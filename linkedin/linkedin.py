@@ -195,7 +195,7 @@ class LinkedInApplication(object):
             if not self.request_succeeded(response):
                 raise LinkedInError(response)
             return response
-    
+
     def search_profile(self, selectors=None, params=None, headers=None):
         if selectors:
             url = '%s:(%s)' % (ENDPOINTS.PEOPLE_SEARCH,
@@ -350,6 +350,34 @@ class LinkedInApplication(object):
             if not self.request_succeeded(response):
                 raise LinkedInError(response)
             return True
+
+    def like_post(self, post_id, is_liked=True):
+        url = '%s/%s/relation-to-viewer/is-liked' % (ENDPOINTS.POSTS, post_id)
+        try:
+            response = self.make_request('PUT', url, data=json.dumps(is_liked))
+            response.raise_for_status()
+        except (requests.ConnectionError, requests.HTTPError), error:
+            raise LinkedInHTTPError(error.message)
+        return True
+
+    def follow_post(self, post_id, is_following=True):
+        url = '%s/%s/relation-to-viewer/is-following' % (ENDPOINTS.POSTS, post_id)
+        try:
+            response = self.make_request('PUT', url, data=json.dumps(is_liked))
+            response.raise_for_status()
+        except (requests.ConnectionError, requests.HTTPError), error:
+            raise LinkedInHTTPError(error.message)
+        return True
+
+    def comment_on_post(self, post_id, comment):
+        comment = {'comment': comment}
+        url = '%s/%s/comments' % (ENDPOINTS.POSTS, post_id)
+        try:
+            response = self.make_request('POST', url, data=json.dumps(comment))
+            response.raise_for_status()
+        except (requests.ConnectionError, requests.HTTPError), error:
+            raise LinkedInHTTPError(error.message)
+        return True
 
     def get_company_by_email_domain(self, email_domain, params=None, headers=None):
         url = '%s?email-domain=%s' % (ENDPOINTS.COMPANIES, email_domain)
