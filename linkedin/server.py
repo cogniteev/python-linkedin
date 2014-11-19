@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import BaseHTTPServer
-import cgi
+import urlparse
 
 from .linkedin import LinkedInApplication, LinkedInAuthentication, PERMISSIONS
 
 
-def quick_api(api_key, secret_key):
+def quick_api(api_key, secret_key, port=8000):
     """
     This method helps you get access to linkedin api quickly when using it
     from the interpreter.
@@ -21,19 +22,19 @@ def quick_api(api_key, secret_key):
                                   PERMISSIONS.enums.values())
     app = LinkedInApplication(authentication=auth)
     print auth.authorization_url
-    _wait_for_user_to_enter_browser(app)
+    _wait_for_user_to_enter_browser(app, port)
     return app
 
 
-def _wait_for_user_to_enter_browser(app):
+def _wait_for_user_to_enter_browser(app, port):
     class MyHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         def do_GET(self):
             p = self.path.split('?')
             if len(p) > 1:
-                params = cgi.parse_qs(p[1], True, True)
+                params = urlparse.parse_qs(p[1], True, True)
                 app.authentication.authorization_code = params['code'][0]
                 app.authentication.get_access_token()
 
-    server_address = ('', 8000)
+    server_address = ('', port)
     httpd = BaseHTTPServer.HTTPServer(server_address, MyHandler)
     httpd.handle_request()

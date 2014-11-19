@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import collections
 
 AccessToken = collections.namedtuple('AccessToken', ['access_token', 'expires_in'])
@@ -54,6 +55,34 @@ class LinkedInInvitation(object):
                     'connect-type': self.connect_type
                 }
             }
+        }
+        for recipient in self.recipients:
+            result['recipients']['values'].append(recipient.json)
+
+        if self.auth_name and self.auth_value:
+            auth = {'name': self.auth_name, 'value': self.auth_value}
+            result['item-content']['invitation-request']['authorization'] = auth
+
+        return result
+
+
+class LinkedInMessage(object):
+    def __init__(self, subject, body, recipients, auth_name=None,
+                 auth_value=None):
+        self.subject = subject
+        self.body = body
+        self.recipients = recipients
+        self.auth_name = auth_name
+        self.auth_value = auth_value
+
+    @property
+    def json(self):
+        result = {
+            'recipients': {
+                'values': []
+            },
+            'subject': self.subject,
+            'body': self.body,
         }
         for recipient in self.recipients:
             result['recipients']['values'].append(recipient.json)
